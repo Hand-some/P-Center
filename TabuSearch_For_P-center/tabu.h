@@ -11,39 +11,37 @@ template<class T1,class T2>
 using fd_pair = std::pair<T1, T2>;
 class node {
 public:
-	int no;//Óëµ±Ç°½áµãÏàÁÚµÄ±àºÅ
-	int dis;//¾àÀë
+	int no;//ä¸å½“å‰ç»“ç‚¹ç›¸é‚»çš„ç¼–å·
+	int dis;//è·ç¦»
 	node();
 	node(int n, int d);
 };
 class Edge {
 public:
-	int f; //·şÎñ½áµãÏÂ±ê
-	int t; //ÓÃ»§½áµãÏÂ±ê
-	int dis; //¾àÀë
+	int f; //æœåŠ¡ç»“ç‚¹ä¸‹æ ‡
+	int t; //ç”¨æˆ·ç»“ç‚¹ä¸‹æ ‡
+	int dis; //è·ç¦»
 	Edge();
 	Edge(int fc, int tc, int d);
 };
 class Solver {
-	int v; //½áµãÊıÁ¿
-	int e;//±ßÊı
-	int f;//×î³¤·şÎñ±ß--Ä¿Ç°ÎªÖ¹½â¾ö·½°¸ÖĞ×îĞ¡µÄ
-	int mf;//µ±Ç°½â¾ö·½°¸µÄ×î³¤·şÎñ±ß
+	int v; //ç»“ç‚¹æ•°é‡
+	int e;//è¾¹æ•°
+	int f;//æœ€é•¿æœåŠ¡è¾¹--ç›®å‰ä¸ºæ­¢è§£å†³æ–¹æ¡ˆä¸­æœ€å°çš„
+	int mf;//å½“å‰è§£å†³æ–¹æ¡ˆçš„æœ€é•¿æœåŠ¡è¾¹
 	int K;
-	int p;//p¸ö·şÎñ½áµã
+	int p;//pä¸ªæœåŠ¡ç»“ç‚¹
 
 	vector<bool> isService;
-	vector<vector<int>> graph;//ÁÚ½Ó¾ØÕó
-	vector<vector<node>> adj; //ÁÚ½Ó±í
-	vector<int> S;//´æ·Åµ±Ç°µÄ½â¾ö·½°¸
-	vector<vector<int>> tabu_table;
+	vector<vector<int>> graph;//é‚»æ¥çŸ©é˜µ
+	vector<vector<node>> adj; //é‚»æ¥è¡¨
+	vector<int> S;//å­˜æ”¾å½“å‰çš„è§£å†³æ–¹æ¡ˆ
+	//vector<vector<int>> tabu_table;
 	vector<int> user_tabu_table;
 	vector<int> facility_tabu_table;
 	vector<fd_pair<unsigned int,unsigned int>> F;
 	vector<fd_pair<unsigned int, unsigned int>> D;
-	vector<int> opt;
-	vector<int> opt_m;
-	vector<int> optS;//´æ·Å×îÓÅµÄ½â¾ö·½°¸
+	vector<int> optS;//å­˜æ”¾æœ€ä¼˜çš„è§£å†³æ–¹æ¡ˆ
 	int iter = 0;
 public:
 	Solver();
@@ -52,7 +50,7 @@ public:
 	bool cmp(node &n1, node &n2);
 	bool initiate_graph(string fn);
 	void sort_nodes();
-	void create_initial_solution(); //¹¹Ôì³õÊ¼½â
+	void create_initial_solution(); //æ„é€ åˆå§‹è§£
 	Edge find_max_edge();
 	vector<int> get_k_neibors(int uno, int mdis);
 	Edge find_move(int uno);
