@@ -1,0 +1,4 @@
+禁忌搜索算法
+main.cpp:批量测试代码
+tabu.h:算法头文件
+tabu.cpp:算法实现
