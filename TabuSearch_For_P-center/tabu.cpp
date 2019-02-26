@@ -2,7 +2,7 @@
 #include<map>
 #include<fstream>
 #include<string>
-/*node¹¹Ôìº¯Êı*/
+/*nodeæ„é€ å‡½æ•°*/
 node::node() {
 
 }
@@ -10,7 +10,7 @@ node::node(int n, int d) {
 	this->no = n;
 	this->dis = d;
 }
-/*Edge¹¹Ôìº¯Êı*/
+/*Edgeæ„é€ å‡½æ•°*/
 Edge::Edge() {
 
 }
@@ -19,11 +19,8 @@ Edge::Edge(int fc, int tc, int d) {
 	this->t = tc;
 	this->dis = d;
 }
-/*Solver¹¹Ôìº¯Êı*/
+/*Solveræ„é€ å‡½æ•°*/
 Solver::Solver() {
-	opt = { 127,98,93,74,48,84,64,55,37,20,59,51,36,26,18,47,39,28,18,13,40,38,22,
-			  15,11,38,32,18,13,9,30,29,15,11,30,27,15,29,23,13 }; //Ğ¡ËãÀı×îÓÅ½â
-	opt_m = { 10,20,30,40,50,60,70,80,90,100,110,120,130,140,150 };//´óËãÀı×îÓÅ½â
 }
 Solver::Solver(int nodeN, int pN) {
 	this->v = nodeN;
@@ -31,19 +28,16 @@ Solver::Solver(int nodeN, int pN) {
 	f = INT_MAX;
 	p = pN;
 	this->adj = vector<vector<node>>(nodeN, vector<node>(nodeN));
-	this->graph = this->tabu_table = vector<vector<int>>(nodeN, vector<int>(nodeN, 0));
+	this->graph = vector<vector<int>>(nodeN, vector<int>(nodeN, 0));
 	user_tabu_table = vector<int>(nodeN, 0);
 	facility_tabu_table = vector<int>(nodeN, 0);
 	F = D = vector<fd_pair<unsigned int,unsigned int>>(nodeN);
 	this->isService = vector<bool>(nodeN, false);
-	opt = { 127,98,93,74,48,84,64,55,37,20,59,51,36,26,18,47,39,28,18,13,40,38,22,
-			  15,11,38,32,18,13,9,30,29,15,11,30,27,15,29,23,13 };
-	opt_m = { 10,20,30,40,50,60,70,80,90,100,110,120,130,140,150 };
 }
 void Solver::print_graph()
 {
-	cout << v <<"  "<< e <<" "<< p;
-	/*for (int i = 0; i < v;++i) {
+	/*cout << v <<"  "<< e <<" "<< p;
+	for (int i = 0; i < v;++i) {
 		for (int j = 0; j < v;++j) {
 			cout << graph[i][j] << "   ";
 		}
@@ -54,19 +48,19 @@ bool Solver::cmp(node &n1, node &n2) {
 	return n1.dis <= n2.dis;
 }
 
-/*ºËĞÄËã·¨ÊµÏÖ*/
+/*æ ¸å¿ƒç®—æ³•å®ç°*/
 void Solver::create_initial_solution() {
 	mf = 0;
 	f = INT_MAX;
 	vector<int> candidates;
 	int count = 1;
-	int userno = 0;//±£´æ×î³¤±ßµÄÓÃ»§½áµã
+	int userno = 0;//ä¿å­˜æœ€é•¿è¾¹çš„ç”¨æˆ·ç»“ç‚¹
 //	srand(clock());
-	int vno = rand() % v; //ÏÈËæ»úÑ¡ÔñÒ»¸ö½áµã£¬±àºÅÎªvno
+	int vno = rand() % v; //å…ˆéšæœºé€‰æ‹©ä¸€ä¸ªç»“ç‚¹ï¼Œç¼–å·ä¸ºvno
 	S.push_back(vno);
-	isService[vno] = true; //¸Ã½áµã×÷Îª·şÎñ½áµã
+	isService[vno] = true; //è¯¥ç»“ç‚¹ä½œä¸ºæœåŠ¡ç»“ç‚¹
 	while (S.size() != p) {
-		/*ÕÒµ½ÓëvnoÏàÁÚµÄ×î³¤·şÎñ±ß£¬²¢ÇÒÏàÁÚ½áµã²»ÊÇ·şÎñ½áµã*/
+		/*æ‰¾åˆ°ä¸vnoç›¸é‚»çš„æœ€é•¿æœåŠ¡è¾¹ï¼Œå¹¶ä¸”ç›¸é‚»ç»“ç‚¹ä¸æ˜¯æœåŠ¡ç»“ç‚¹*/
 		count = adj[vno].size() - 1;
 		while (count >= 0 && isService[adj[vno][count].no]) {
 			count--;
@@ -82,10 +76,10 @@ void Solver::create_initial_solution() {
 		S.push_back(vno);
 		isService[vno] = true;
 	}
-	/*¹¹ÔìF&D±í*/
+	/*æ„é€ F&Dè¡¨*/
 	for (int i = 0; i < F.size(); ++i) {
-		int min_i = 0;//×î½ü·şÎñ½áµãÏÂ±ê
-		int smin_i = 1;//´Î½ü·şÎñ½áµãÏÂ±ê 
+		int min_i = 0;//æœ€è¿‘æœåŠ¡ç»“ç‚¹ä¸‹æ ‡
+		int smin_i = 1;//æ¬¡è¿‘æœåŠ¡ç»“ç‚¹ä¸‹æ ‡ 
 		graph[i][S[min_i]] > graph[i][S[smin_i]] ? min_i = 1, smin_i = 0 : min_i = 0;
 		for (int j = 2; j < S.size(); j++) {
 			if (graph[i][S[j]] < graph[i][S[min_i]]) {
@@ -100,7 +94,7 @@ void Solver::create_initial_solution() {
 		D[i].first = graph[i][S[min_i]];
 		F[i].second = S[smin_i];
 		D[i].second = graph[i][S[smin_i]];
-		mf = (mf < D[i].first ? D[i].first : mf); //mf=µ±Ç°×î³¤·şÎñ±ß
+		mf = (mf < D[i].first ? D[i].first : mf); //mf=å½“å‰æœ€é•¿æœåŠ¡è¾¹
 	}
 	f = mf;
 	optS = S;
@@ -108,12 +102,12 @@ void Solver::create_initial_solution() {
 
 Edge Solver::find_max_edge() {
 	vector<Edge> longest_service_edge;
-	/*ÕÒµ½×î³¤·şÎñ±ß*/
+	/*æ‰¾åˆ°æœ€é•¿æœåŠ¡è¾¹*/
 	for (int i = 0; i < D.size(); ++i) {
 		Edge tmpe = Edge();
 		if (D[i].first == mf) {
-			tmpe.f = F[i].first;//·şÎñ½áµã
-			tmpe.t = i;//ÓÃ»§½áµã
+			tmpe.f = F[i].first;//æœåŠ¡ç»“ç‚¹
+			tmpe.t = i;//ç”¨æˆ·ç»“ç‚¹
 			tmpe.dis = mf;
 			longest_service_edge.push_back(tmpe);
 		}
@@ -141,17 +135,17 @@ vector<int> Solver::get_k_neibors(int uno, int mdis) {
 Edge Solver::find_move(int uno) {
 	int best = INT_MAX;
 	int tabu_best = INT_MAX;
-	vector<Edge> spair;// ·Ç½û¼ÉµÄµÄ×î¼Ñ½áµã¶Ô
-	vector<Edge> tabu_spair;//½û¼ÉµÄ×î¼Ñ½áµã¶Ô 
-	vector<int> less_node = this->get_k_neibors(uno, D[uno].first); /*¸ù¾İ×î³¤·şÎñ±ßµÄÓÃ»§½áµãuno£¬ÕÒµ½adj[uno]ÖĞ±Èµ±Ç°·şÎñ±ßmfĞ¡µÄÓÃ»§½áµã¼¯ºÏ*/
-	Edge midRes = Edge(); //±£´æÖĞ¼ä½áµã¶Ô
-	int SC = 0;//±£´æÔö¼ÓÒ»¸ö½áµãºóµ±Ç°½â¾ö·½°¸ÖĞµÄ×î³¤·şÎñ±ß
-			   /*ÏÈ±¸·İF&D±í*/
+	vector<Edge> spair;// éç¦å¿Œçš„çš„æœ€ä½³ç»“ç‚¹å¯¹
+	vector<Edge> tabu_spair;//ç¦å¿Œçš„æœ€ä½³ç»“ç‚¹å¯¹ 
+	vector<int> less_node = this->get_k_neibors(uno, D[uno].first); /*æ ¹æ®æœ€é•¿æœåŠ¡è¾¹çš„ç”¨æˆ·ç»“ç‚¹unoï¼Œæ‰¾åˆ°adj[uno]ä¸­æ¯”å½“å‰æœåŠ¡è¾¹mfå°çš„ç”¨æˆ·ç»“ç‚¹é›†åˆ*/
+	Edge midRes = Edge(); //ä¿å­˜ä¸­é—´ç»“ç‚¹å¯¹
+	int SC = 0;//ä¿å­˜å¢åŠ ä¸€ä¸ªç»“ç‚¹åå½“å‰è§£å†³æ–¹æ¡ˆä¸­çš„æœ€é•¿æœåŠ¡è¾¹
+			   /*å…ˆå¤‡ä»½F&Dè¡¨*/
 	vector<fd_pair<unsigned int,unsigned int>> FC(F);
 	vector<fd_pair<unsigned int,unsigned int>> DC(D);
-	for (const auto addNode : less_node) { //less_node¼¯ºÏÀïµÄÃ¿Ò»¸ö½áµã£¬¶¼ÒªÊÔ×Å¼ÓÈëÒ»´Î
-		SC = this->Add_Facility(addNode); //½«addNode±ä³É·şÎñ½áµã,SCÎª¼ÓÈë½áµãºóµÄ×î³¤·şÎñ±ß
-		map<int, int> Mf;  //Mf[i] = É¾³ıµ±Ç°·şÎñ½áµãiËùĞÂ»ñµÃµÄ×î³¤·şÎñ±ß
+	for (const auto addNode : less_node) { //less_nodeé›†åˆé‡Œçš„æ¯ä¸€ä¸ªç»“ç‚¹ï¼Œéƒ½è¦è¯•ç€åŠ å…¥ä¸€æ¬¡
+		SC = this->Add_Facility(addNode); //å°†addNodeå˜æˆæœåŠ¡ç»“ç‚¹,SCä¸ºåŠ å…¥ç»“ç‚¹åçš„æœ€é•¿æœåŠ¡è¾¹
+		map<int, int> Mf;  //Mf[i] = åˆ é™¤å½“å‰æœåŠ¡ç»“ç‚¹iæ‰€æ–°è·å¾—çš„æœ€é•¿æœåŠ¡è¾¹
 
 		for (const auto s : S) {
 			Mf[s] = 0;
@@ -165,11 +159,11 @@ Edge Solver::find_move(int uno) {
 
 
 		for (const auto delNode : S) {
-			/*¶ÔÓÚÃ¿Ò»¸ö·şÎñ½áµã£¬²»°üÀ¨ĞÂ¼ÓÈëµÄ£¬ÕÒµ½<less_node[i],S[k]> µÄ×î³¤·şÎñ±ß*/
+			/*å¯¹äºæ¯ä¸€ä¸ªæœåŠ¡ç»“ç‚¹ï¼Œä¸åŒ…æ‹¬æ–°åŠ å…¥çš„ï¼Œæ‰¾åˆ°<less_node[i],S[k]> çš„æœ€é•¿æœåŠ¡è¾¹*/
 			int tmp = max(SC, Mf[delNode]);
-			midRes.f = delNode;//·şÎñ½áµã-ÓÃ»§½áµã
-			midRes.t = addNode; //ÓÃ»§½áµã-·şÎñ½áµã
-			if (iter >= user_tabu_table[delNode] || iter >= facility_tabu_table[addNode]) {  //·Ç½û¼ÉµÄ
+			midRes.f = delNode;//æœåŠ¡ç»“ç‚¹-ç”¨æˆ·ç»“ç‚¹
+			midRes.t = addNode; //ç”¨æˆ·ç»“ç‚¹-æœåŠ¡ç»“ç‚¹
+			if (iter >= user_tabu_table[delNode] || iter >= facility_tabu_table[addNode]) {  //éç¦å¿Œçš„
 				if (best == tmp) {
 					midRes.dis = best;
 					spair.push_back(midRes);
@@ -181,7 +175,7 @@ Edge Solver::find_move(int uno) {
 					spair.push_back(midRes);
 				}
 			}
-			else {//½û¼ÉµÄ
+			else {//ç¦å¿Œçš„
 				if (tabu_best == tmp) {
 					midRes.dis = tabu_best;
 					tabu_spair.push_back(midRes);
@@ -199,14 +193,14 @@ Edge Solver::find_move(int uno) {
 		isService[addNode] = false;
 	}
 
-	/*Ëæ»úÑ¡Ôñ³ö×îÓÅ½»»»¶Ô*/
+	/*éšæœºé€‰æ‹©å‡ºæœ€ä¼˜äº¤æ¢å¯¹*/
 	if (tabu_spair.size() > 0 && tabu_best < best && tabu_best < f || spair.size() == 0) {
-		//´Ó½û¼É¶ÔÖĞÑ¡³öÒ»¶Ô½»»»
+		//ä»ç¦å¿Œå¯¹ä¸­é€‰å‡ºä¸€å¯¹äº¤æ¢
 		int index = rand() % tabu_spair.size();
 		midRes = tabu_spair[index];
 	}
 	else {
-		//´Ó·Ç½û¼ÉÖĞÑ¡ÔñÒ»¶Ô½»»»
+		//ä»éç¦å¿Œä¸­é€‰æ‹©ä¸€å¯¹äº¤æ¢
 		int index = rand() % spair.size();
 		midRes = spair[index];
 	}
@@ -214,7 +208,7 @@ Edge Solver::find_move(int uno) {
 }
 
 void Solver::make_move(Edge &edge) {
-	//Ôö¼Ó½áµã
+	//å¢åŠ ç»“ç‚¹
 	this->Add_Facility(edge.t);
 	S.push_back(edge.t);
 	this->Remove_Facility(edge.f);
@@ -224,14 +218,14 @@ void Solver::make_move(Edge &edge) {
 
 }
 int Solver::tabu_search(int opv) {
-	Edge ledge;//±£´æÒª½»»»µÄ½Úµã¶Ô
+	Edge ledge;//ä¿å­˜è¦äº¤æ¢çš„èŠ‚ç‚¹å¯¹
 	while (f != opv || iter < 10000) {
 		//cout << mf << " " << f << endl;
-		ledge = this->find_max_edge();//ÕÒµ½×î³¤·şÎñ±ß,ÓÃ»§½áµãÎª ledge.t
+		ledge = this->find_max_edge();//æ‰¾åˆ°æœ€é•¿æœåŠ¡è¾¹,ç”¨æˆ·ç»“ç‚¹ä¸º ledge.t
 		ledge = find_move(ledge.t);
 		make_move(ledge);
 		iter++;
-		//¸üĞÂ                                  
+		//æ›´æ–°                                  
 		if (mf <= f) {
 			f = mf;
 			optS = S;
@@ -240,10 +234,10 @@ int Solver::tabu_search(int opv) {
 	return f;
 }
 int Solver::Add_Facility(int vno) {
-	mf = 0;//±£´æÔö¼ÓÍê½áµãºóµÄ×î³¤·şÎñ±ß
+	mf = 0;//ä¿å­˜å¢åŠ å®Œç»“ç‚¹åçš„æœ€é•¿æœåŠ¡è¾¹
 		   //	S.push_back(vno);
 	isService[vno] = true;
-	//¸üĞÂF/D±í
+	//æ›´æ–°F/Dè¡¨
 	for (int i = 0; i < this->v; ++i) {
 		if (graph[i][vno] <= D[i].first) {
 			F[i].second = F[i].first; D[i].second = D[i].first;
@@ -262,7 +256,7 @@ void Solver::Remove_Facility(int vno) {
 	mf = 0;
 	S.erase(find(S.begin(), S.end(), vno));
 	isService[vno] = false;
-	/*¸üĞÂF/D±í*/
+	/*æ›´æ–°F/Dè¡¨*/
 	for (int i = 0; i < this->v; ++i) {
 		if (F[i].first == vno) {
 			F[i].first = F[i].second;
@@ -301,23 +295,23 @@ void Solver::Find_Next(int v) {
 	D[v].second = ans[index].second;
 }
 
-/*ÓÃÎÄ¼ş¹¹ÔìÍ¼£¬²ÎÊıÎªÎÄ¼şÃû*/
+/*ç”¨æ–‡ä»¶æ„é€ å›¾ï¼Œå‚æ•°ä¸ºæ–‡ä»¶å*/
 bool Solver::initiate_graph(string fn) {
 	ifstream infile(fn, ios::in);
-	if (!infile) { /*ÎÄ¼ş´ò¿ªÊ§°Ü*/
+	if (!infile) { /*æ–‡ä»¶æ‰“å¼€å¤±è´¥*/
 		cout << "file open error!" << endl;
 		exit(1);
 	}
 	infile >> v >> e >> p;
 	graph = vector<vector<int>>(v, vector<int>(v, INT_MAX));
-	tabu_table = vector<vector<int>>(v, vector<int>(v, 0)); //µ¥½û¼É
-	facility_tabu_table = user_tabu_table = vector<int>(v, 0);//Ë«½û¼É
+	tabu_table = vector<vector<int>>(v, vector<int>(v, 0)); //å•ç¦å¿Œ
+	facility_tabu_table = user_tabu_table = vector<int>(v, 0);//åŒç¦å¿Œ
 	adj = vector<vector<node>>(v);
 	F = D = vector<fd_pair<unsigned int,unsigned int>>(v);
 	isService = vector<bool>(v, false);
 
 	int snode = 0, enode = 0, dis = 0;
-	while (infile >> snode >> enode >> dis) {//ÖğĞĞ¶ÁÈ¡ÎÄ¼ş
+	while (infile >> snode >> enode >> dis) {//é€è¡Œè¯»å–æ–‡ä»¶
 		//if(graph[snode][enode] > dis)
 		snode -= 1;
 		enode -= 1;
@@ -325,7 +319,7 @@ bool Solver::initiate_graph(string fn) {
 		graph[snode][snode] = graph[enode][enode] = 0;
 	}
 	infile.close();
-	/*¸¥ÂåÒÁµÂËã·¨²¹È«±ß*/
+	/*å¼—æ´›ä¼Šå¾·ç®—æ³•è¡¥å…¨è¾¹*/
 	for (int i = 0; i < v ; ++i) {
 		for (int j = 0; j < v; ++j) {
 			for (int k = 0; k < v; ++k) {
@@ -343,7 +337,7 @@ bool Solver::initiate_graph(string fn) {
 			adj[i].push_back(n1);
 		}
 	}
-	this->sort_nodes();//¸øÁÚ¾Ó½áµãÅÅĞò
+	this->sort_nodes();//ç»™é‚»å±…ç»“ç‚¹æ’åº
 }
 
 void Solver::sort_nodes()
